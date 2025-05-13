@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Campo Cidade - Plataforma Conexão Campo e Cidade</title>
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #4aaf50, #2c6a28);
+    color: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  #app {
+    background: #f9f9f9;
+    border-radius: 14px;
+    width: 95vw;
+    max-width: 380px;
+    height: 600px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: #2c6a28;
+    color: white;
+    font-weight: 800;
+    font-size: 1.7rem;
+    padding: 18px 28px;
+    border-radius: 14px 14px 0 0;
+    user-select: none;
+    text-align: center;
+  }
+
+  /* Initial stacked container for login/register with tabs */
+  #auth-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 24px 24px;
+  }
+
+  /* Tabs for login/register */
+  .auth-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 8px rgb(0 0 0 / 0.15);
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 12px 0;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    background: #bdd5b3;
+    color: #2c6a28;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  .auth-tab.active {
+    background: #4aaf50;
+    color: white;
+    box-shadow: inset 0 -4px 0 #f4f8f1;
+  }
+  .auth-tab:hover:not(.active) {
+    background: #9fc46c;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  label {
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  input[type="text"], input[type="password"], input[type="number"], select {
+    padding: 10px 14px;
+    border-radius: 9px;
+    border: 1.8px solid #b5b5b5;
+    margin-bottom: 18px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: #4caf50;
+    box-shadow: 0 0 7px #4caf50bb;
+  }
+
+  button {
+    background: #4caf50;
+    color: white;
+    font-weight: 700;
+    padding: 14px 20px;
+    border-radius: 18px;
+    border: none;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  button:hover:not(:disabled) {
+    background: #3a8531;
+  }
+  button:disabled {
+    background: #a6c29a;
+    cursor: default;
+  }
+
+  .error-message {
+    color: #c62828;
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .success-message {
+    color: #2e7d32;
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  /* MAIN INTERFACE - after login */
+  #main-interface {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+  }
+
+  /* Main tabs */
+  .main-tabs {
+    display: flex;
+    background: #4caf50;
+    border-radius: 0 0 14px 14px;
+  }
+  .main-tab {
+    flex: 1 0 auto;
+    cursor: pointer;
+    text-align: center;
+    padding: 14px 0;
+    font-weight: 700;
+    color: white;
+    user-select: none;
+    transition: background-color 0.3s ease;
+    border-bottom: 3px solid transparent;
+  }
+  .main-tab.active {
+    background: #387c2e;
+    border-bottom: 3px solid #ffe57f;
+  }
+  .main-tab:hover:not(.active) {
+    background: #388e3c;
+  }
+
+  .tab-content {
+    flex: 1;
+    padding: 16px 24px;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 0 0 14px 14px;
+    color: #222;
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  /* SELL PRODUCTS FORM */
+  #sell-form label {
+    margin-top: 12px;
+  }
+  #sell-form input[type="text"], #sell-form input[type="number"], #sell-form select {
+    width: 100%;
+  }
+  #sell-form button {
+    margin-top: 18px;
+  }
+
+  /* PRODUCT LIST */
+  #product-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  #product-list li {
+    background: #f4f9f4;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 9px rgb(0 0 0 / 0.07);
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  #product-list li img.product-photo {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1.8px solid #a0c290;
+    flex-shrink: 0;
+  }
+  #product-list li .info {
+    flex: 1;
+  }
+  #product-list li .info strong {
+    display: block;
+    font-size: 1.15rem;
+    color: #2e7d32;
+  }
+  #product-list li .info span {
+    font-size: 0.9rem;
+    color: #555;
+    display: block;
+    margin-top: 4px;
+  }
+  #product-list li button.buy-btn {
+    background: #4caf50;
+    border: none;
+    color: white;
+    border-radius: 16px;
+    padding: 8px 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+  }
+  #product-list li button.buy-btn:hover:not(:disabled) {
+    background: #388e3c;
+  }
+  #product-list li button.buy-btn:disabled {
+    background: #a6c29a;
+    cursor: default;
+  }
+
+  /* PURCHASE MESSAGE */
+  #purchase-message {
+    background: #dff0d8;
+    border: 1px solid #a6d785;
+    padding: 10px 16px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    color: #3c763d;
+    font-weight: 700;
+    display: none;
+    text-align: center;
+  }
+
+  /* PROFILE */
+  #profile {
+    font-size: 1rem;
+    color: #234d20;
+  }
+  #logout-btn {
+    display: inline-block;
+    margin-top: 22px;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  #logout-btn:hover {
+    background: #b71c1c;
+  }
+
+  /* Marketplace list */
+  #marketplace-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  #marketplace-list li {
+    background: #f9f9f9;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    padding: 14px 18px;
+    box-shadow: 0 1px 6px rgb(0 0 0 / 0.07);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  #marketplace-list li img.product-photo {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 10px;
+    flex-shrink: 0;
+    border: 1.8px solid #7ab878;
+  }
+  #marketplace-list li .info {
+    flex: 1;
+  }
+  #marketplace-list li .info strong {
+    font-size: 1.1rem;
+    color: #347b30;
+    display: block;
+  }
+  #marketplace-list li .info span {
+    font-size: 0.88rem;
+    color: #555;
+    display: block;
+    margin-top: 3px;
+  }
+  #marketplace-list li button.buy-btn {
+    background: #4caf50;
+    border: none;
+    color: white;
+    border-radius: 14px;
+    padding: 6px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+  }
+  #marketplace-list li button.buy-btn:hover:not(:disabled) {
+    background: #388e3c;
+  }
+  #marketplace-list li button.buy-btn:disabled {
+    background: #a6c29a;
+    cursor: default;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 400px) {
+    #app {
+      max-width: 100vw;
+      border-radius: 0;
+      height: 100vh;
+      justify-content: start;
+    }
+  }
+</style>
+</head>
+
+<body>
+  <div id="app" role="main" aria-label="Plataforma Campo Cidade">
+
+    <header>Campo Cidade</header>
+
+    <section id="auth-screen" aria-label="Autenticação com Login e Cadastro">
+
+      <nav class="auth-tabs" role="tablist" aria-label="Navegação Login e Cadastro">
+        <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" aria-controls="login-form-container" tabindex="0">Login</button>
+        <button class="auth-tab" id="tab-register" role="tab" aria-selected="false" aria-controls="register-form-container" tabindex="-1">Cadastro</button>
+      </nav>
+
+      <div id="login-form-container" role="tabpanel" aria-labelledby="tab-login">
+        <form id="login-form" aria-describedby="login-error">
+          <label for="login-username">Usuário</label>
+          <input type="text" id="login-username" name="login-username" autocomplete="username" placeholder="Digite seu usuário" required />
+          
+          <label for="login-password">Senha</label>
+          <input type="password" id="login-password" name="login-password" autocomplete="current-password" placeholder="Digite sua senha" required />
+
+          <label for="login-role">Eu sou:</label>
+          <select id="login-role" name="login-role" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="producer">Produtor Rural</option>
+            <option value="consumer">Consumidor</option>
+          </select>
+
+          <div id="login-error" class="error-message" aria-live="polite"></div>
+          
+          <button class="login-btn" type="submit">Entrar</button>
+        </form>
+      </div>
+
+      <div id="register-form-container" role="tabpanel" aria-labelledby="tab-register" hidden>
+        <form id="register-form" aria-describedby="register-error register-success">
+          <label for="register-username">Usuário</label>
+          <input type="text" id="register-username" name="register-username" autocomplete="username" placeholder="Escolha um usuário" required minlength="3" maxlength="16" pattern="[a-zA-Z0-9_]+" />
+          
+          <label for="register-password">Senha</label>
+          <input type="password" id="register-password" name="register-password" autocomplete="new-password" placeholder="Escolha uma senha" required minlength="4" />
+
+          <label for="register-role">Eu sou:</label>
+          <select id="register-role" name="register-role" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="producer">Produtor Rural</option>
+            <option value="consumer">Consumidor</option>
+          </select>
+
+          <div id="register-error" class="error-message" aria-live="polite"></div>
+          <div id="register-success" class="success-message" aria-live="polite"></div>
+
+          <button id="register-btn" type="submit">Cadastrar-se</button>
+        </form>
+      </div>
+
+    </section>
+
+    <section id="main-interface" aria-label="Interface Principal da Plataforma" tabindex="0">
+      <nav class="main-tabs" role="tablist" aria-label="Navegação Principal">
+        <button class="main-tab" id="tab-sell" role="tab" aria-selected="false" aria-controls="tab-sell-content" tabindex="-1">Vender Produtos</button>
+        <button class="main-tab" id="tab-buy" role="tab" aria-selected="false" aria-controls="tab-buy-content" tabindex="-1">Comprar Produtos</button>
+        <button class="main-tab" id="tab-profile" role="tab" aria-selected="false" aria-controls="tab-profile-content" tabindex="-1">Meu Perfil</button>
+      </nav>
+      <div id="tab-sell-content" class="tab-content" role="tabpanel" aria-labelledby="tab-sell">
+        <h3>Vender Produtos</h3>
+        <form id="sell-form" aria-label="Cadastrar produto para venda" enctype="multipart/form-data" novalidate>
+          <label for="prod-name">Nome do Produto</label>
+          <input type="text" id="prod-name" name="prod-name" placeholder="Ex: Tomate" required maxlength="50" />
+
+          <label for="prod-quantity">Quantidade</label>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="number" id="prod-quantity" name="prod-quantity" min="1" step="any" placeholder="Ex: 10" required style="flex: 1;" />
+            <select id="prod-unit" name="prod-unit" required style="flex: 1.4;">
+              <option value="" disabled selected>Unidade</option>
+              <option value="kg">Kg (quilo)</option>
+              <option value="m">Metro (m)</option>
+              <option value="unit">Unidade(s)</option>
+            </select>
+          </div>
+
+          <label for="prod-price">Preço (R$ por unidade)</label>
+          <input type="number" id="prod-price" name="prod-price" min="0.01" step="0.01" placeholder="Ex: 4.50" required />
+
+          <label for="prod-photo">Foto do Produto (opcional)</label>
+          <input type="file" id="prod-photo" name="prod-photo" accept="image/*" />
+
+          <button type="submit">Cadastrar Produto</button>
+        </form>
+        <div id="product-list" aria-live="polite" aria-relevant="additions"></div>
+      </div>
+
+      <div id="tab-buy-content" class="tab-content" role="tabpanel" aria-labelledby="tab-buy">
+        <h3>Comprar Produtos</h3>
+        <div id="purchase-message" role="alert"></div>
+        <div id="marketplace-list" aria-live="polite" aria-relevant="additions"></div>
+      </div>
+
+      <div id="tab-profile-content" class="tab-content" role="tabpanel" aria-labelledby="tab-profile">
+        <h3>Meu Perfil</h3>
+        <div id="profile-info"></div>
+        <button id="logout-btn" aria-label="Sair da plataforma">Sair</button>
+      </div>
+    </section>
+
+<script>
+  'use strict';
+
+  // Elements references
+  const authScreen = document.getElementById('auth-screen');
+  const mainInterface = document.getElementById('main-interface');
+
+  // Auth Tab Buttons
+  const tabLoginBtn = document.getElementById('tab-login');
+  const tabRegisterBtn = document.getElementById('tab-register');
+  const loginFormContainer = document.getElementById('login-form-container');
+  const registerFormContainer = document.getElementById('register-form-container');
+
+  // Forms
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+
+  // Login inputs and error display
+  const loginUsername = document.getElementById('login-username');
+  const loginPassword = document.getElementById('login-password');
+  const loginRole = document.getElementById('login-role');
+  const loginError = document.getElementById('login-error');
+
+  // Register inputs and messages
+  const registerUsername = document.getElementById('register-username');
+  const registerPassword = document.getElementById('register-password');
+  const registerRole = document.getElementById('register-role');
+  const registerError = document.getElementById('register-error');
+  const registerSuccess = document.getElementById('register-success');
+
+  // Main interface tabs
+  const mainTabs = document.querySelectorAll('.main-tab');
+  const tabSell = document.getElementById('tab-sell');
+  const tabBuy = document.getElementById('tab-buy');
+  const tabProfile = document.getElementById('tab-profile');
+
+  const tabSellContent = document.getElementById('tab-sell-content');
+  const tabBuyContent = document.getElementById('tab-buy-content');
+  const tabProfileContent = document.getElementById('tab-profile-content');
+
+  // Sell form and lists
+  const sellForm = document.getElementById('sell-form');
+  const productList = document.getElementById('product-list');
+  const marketplaceList = document.getElementById('marketplace-list');
+  const purchaseMessage = document.getElementById('purchase-message');
+
+  const profileInfo = document.getElementById('profile-info');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  // Product photo input
+  const prodPhotoInput = document.getElementById('prod-photo');
+
+  // Current user state
+  let currentUser = null;
+
+  // Load users from localStorage (simulate a user DB)
+  function loadUsers(){
+    try {
+      const data = localStorage.getItem('campo-cidade-users');
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+  function saveUsers(users){
+    localStorage.setItem('campo-cidade-users', JSON.stringify(users));
+  }
+
+  // Load products from localStorage
+  function loadProducts(){
+    try {
+      const data = localStorage.getItem('campo-cidade-products');
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+  function saveProducts(products){
+    localStorage.setItem('campo-cidade-products', JSON.stringify(products));
+  }
+
+  // Switch auth tabs
+  function switchAuthTab(selectedTab){
+    if(selectedTab === 'login'){
+      tabLoginBtn.classList.add('active');
+      tabLoginBtn.setAttribute('aria-selected', 'true');
+      tabLoginBtn.tabIndex = 0;
+      loginFormContainer.hidden = false;
+
+      tabRegisterBtn.classList.remove('active');
+      tabRegisterBtn.setAttribute('aria-selected', 'false');
+      tabRegisterBtn.tabIndex = -1;
+      registerFormContainer.hidden = true;
+
+      // Clear messages on tab switch
+      loginError.textContent = '';
+      registerError.textContent = '';
+      registerSuccess.textContent = '';
+      loginForm.reset();
+      registerForm.reset();
+
+    } else if(selectedTab === 'register'){
+      tabRegisterBtn.classList.add('active');
+      tabRegisterBtn.setAttribute('aria-selected', 'true');
+      tabRegisterBtn.tabIndex = 0;
+      registerFormContainer.hidden = false;
+
+      tabLoginBtn.classList.remove('active');
+      tabLoginBtn.setAttribute('aria-selected', 'false');
+      tabLoginBtn.tabIndex = -1;
+      loginFormContainer.hidden = true;
+
+      loginError.textContent = '';
+      registerError.textContent = '';
+      registerSuccess.textContent = '';
+      loginForm.reset();
+      registerForm.reset();
+    }
+  }
+
+  tabLoginBtn.addEventListener('click', () => switchAuthTab('login'));
+  tabRegisterBtn.addEventListener('click', () => switchAuthTab('register'));
+
+  // Validate username pattern
+  const usernamePattern = /^[a-zA-Z0-9_]+$/;
+
+  // Register form submit handler
+  registerForm.addEventListener('submit', e => {
+    e.preventDefault();
+    registerError.textContent = '';
+    registerSuccess.textContent = '';
+
+    const username = registerUsername.value.trim();
+    const password = registerPassword.value;
+    const role = registerRole.value;
+
+    if(username.length < 3 || username.length > 16 || !usernamePattern.test(username)){
+      registerError.textContent = 'Usuário inválido: use apenas letras, números e "_" com 3-16 caracteres.';
+      return;
+    }
+    if(password.length < 4){
+      registerError.textContent = 'Senha deve ter pelo menos 4 caracteres.';
+      return;
+    }
+    if(!role){
+      registerError.textContent = 'Selecione seu perfil.';
+      return;
+    }
+
+    let users = loadUsers();
+    if(users.some(u => u.username.toLowerCase() === username.toLowerCase())){
+      registerError.textContent = 'Usuário já existe.';
+      return;
+    }
+
+    users.push({username, password, role});
+    saveUsers(users);
+
+    registerSuccess.textContent = 'Cadastro realizado com sucesso! Agora faça login.';
+    registerForm.reset();
+  });
+
+  // Login form submit handler
+  loginForm.addEventListener('submit', e => {
+    e.preventDefault();
+    loginError.textContent = '';
+
+    const username = loginUsername.value.trim();
+    const password = loginPassword.value;
+    const role = loginRole.value;
+
+    if(!username || !password || !role){
+      loginError.textContent = 'Preencha todos os campos.';
+      return;
+    }
+
+    const users = loadUsers();
+    const user = users.find(u => u.username === username && u.password === password && u.role === role);
+
+    if(!user){
+      loginError.textContent = 'Usuário, senha ou perfil incorretos.';
+      return;
+    }
+
+    currentUser = { username: user.username, role: user.role };
+    enterApp();
+  });
+
+  // Enter main app after login
+  function enterApp(){
+    authScreen.style.display = 'none';
+    mainInterface.style.display = 'flex';
+    configureMainTabs();
+    renderProfile();
+    renderFormsAndLists();
+  }
+
+  // Configure main tabs depending on role, set default tab accordingly
+  function configureMainTabs(){
+    // hide or show tabs according to user role
+    if(currentUser.role === 'producer'){
+      showTab('tab-sell');
+    } else if(currentUser.role === 'consumer'){
+      showTab('tab-buy');
+    }
+  }
+
+  function showTab(tabId){
+    mainTabs.forEach(t => {
+      if(t.id === tabId){
+        t.classList.add('active');
+        t.setAttribute('aria-selected','true');
+        t.tabIndex = 0;
+      } else {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected','false');
+        t.tabIndex = -1;
+      }
+    });
+
+    tabSellContent.classList.toggle('active', tabId === 'tab-sell');
+    tabBuyContent.classList.toggle('active', tabId === 'tab-buy');
+    tabProfileContent.classList.toggle('active', tabId === 'tab-profile');
+
+    // Enforce role restrictions on tab access
+    if(tabId === 'tab-sell' && currentUser.role !== 'producer'){
+      showTab('tab-buy');
+      return;
+    }
+    if(tabId === 'tab-buy' && currentUser.role !== 'consumer'){
+      showTab('tab-sell');
+      return;
+    }
+  }
+
+  mainTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      showTab(tab.id);
+    });
+    tab.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const tabsArr = Array.from(mainTabs);
+        const idx = tabsArr.indexOf(document.activeElement);
+        let nxtIdx;
+        if(e.key === 'ArrowRight'){
+          nxtIdx = (idx + 1) % mainTabs.length;
+        } else {
+          nxtIdx = (idx - 1 + mainTabs.length) % mainTabs.length;
+        }
+        tabsArr[nxtIdx].focus();
+        showTab(tabsArr[nxtIdx].id);
+      }
+    });
+  });
+
+  // Render profile info
+  function renderProfile(){
+    if(!currentUser) return;
+    profileInfo.innerHTML = `
+      <p><strong>Usuário:</strong> ${currentUser.username}</p>
+      <p><strong>Perfil:</strong> ${currentUser.role === 'producer' ? 'Produtor Rural' : 'Consumidor'}</p>
+    `;
+  }
+
+  // Logout
+  logoutBtn.addEventListener('click', () => {
+    currentUser = null;
+    authScreen.style.display = 'flex';
+    mainInterface.style.display = 'none';
+    switchAuthTab('login');
+    loginForm.reset();
+    registerForm.reset();
+    loginError.textContent = '';
+    registerError.textContent = '';
+    registerSuccess.textContent = '';
+    productList.innerHTML = '';
+    marketplaceList.innerHTML = '';
+    purchaseMessage.style.display = 'none';
+  });
+
+  // Product list for producer - show only current user's products
+  function renderProductList(){
+    if(currentUser.role !== 'producer'){
+      productList.innerHTML = `<p>Você não tem acesso a esta aba.</p>`;
+      return;
+    }
+    const products = loadProducts().filter(p => p.seller === currentUser.username);
+    if(products.length === 0){
+      productList.innerHTML = '<p>Você ainda não cadastrou nenhum produto.</p>';
+      return;
+    }
+    let html = '<ul>';
+    for(const product of products){
+      html += `<li>
+        ${product.photo ? `<img class="product-photo" src="${product.photo}" alt="Foto do produto ${escapeHtml(product.name)}" />` : ''}
+        <div class="info">
+          <strong>${escapeHtml(product.name)}</strong>
+          <span>Quantidade: ${product.quantity} ${unitName(product.unit)}</span>
+          <span>Preço: R$ ${product.price.toFixed(2)} por ${unitName(product.unit)}</span>
+        </div>
+        <button class="buy-btn" disabled title="Este é seu produto">Seu Produto</button>
+      </li>`;
+    }
+    html += '</ul>';
+    productList.innerHTML = html;
+  }
+
+  // Marketplace for consumer - show products from other producers with quantity > 0
+  function renderMarketplace(){
+    if(currentUser.role !== 'consumer'){
+      marketplaceList.innerHTML = '<p>Você não tem acesso a esta aba.</p>';
+      return;
+    }
+    let products = loadProducts();
+    // Filter only products from others with quantity > 0
+    products = products.filter(p => p.seller !== currentUser.username && p.quantity > 0);
+    if(products.length === 0){
+      marketplaceList.innerHTML = '<p>Não há produtos disponíveis no momento.</p>';
+      return;
+    }
+    let html = '<ul>';
+    for(const product of products){
+      html += `<li>
+        ${product.photo ? `<img class="product-photo" src="${product.photo}" alt="Foto do produto ${escapeHtml(product.name)}" />` : ''}
+        <div class="info">
+          <strong>${escapeHtml(product.name)}</strong>
+          <span>Quantidade: ${product.quantity} ${unitName(product.unit)}</span>
+          <span>Preço: R$ ${product.price.toFixed(2)} por ${unitName(product.unit)}</span>
+          <span>Produtor: ${escapeHtml(product.seller)}</span>
+        </div>
+        <button class="buy-btn" data-product="${escapeHtml(product.name)}" data-seller="${escapeHtml(product.seller)}" aria-label="Comprar ${escapeHtml(product.name)}">Comprar</button>
+      </li>`;
+    }
+    html += '</ul>';
+    marketplaceList.innerHTML = html;
+    // Add buy buttons listeners
+    const buyBtns = marketplaceList.querySelectorAll('.buy-btn');
+    buyBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        handlePurchase(btn.dataset.product, btn.dataset.seller);
+      });
+    });
+  }
+
+  // Sanitize text (basic)
+  function escapeHtml(text){
+    return text.replace(/[&<>"']/g, function(m){
+      switch(m){
+        case '&': return '&amp;';
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#39;';
+        default: return m;
+      }
+    });
+  }
+
+  // Unit names expanded
+  function unitName(unit){
+    switch(unit){
+      case 'kg': return 'Kg';
+      case 'm': return 'm';
+      case 'unit': return 'unidade(s)';
+      default: return unit;
+    }
+  }
+
+  // Handle purchase
+  function handlePurchase(productName, seller){
+    let products = loadProducts();
+    const product = products.find(p => p.name === productName && p.seller === seller);
+    if(!product || product.quantity < 1){
+      purchaseMessage.textContent = 'Produto indisponível no momento.';
+      purchaseMessage.style.display = 'block';
+      setTimeout(() => purchaseMessage.style.display = 'none', 4000);
+      renderMarketplace();
+      return;
+    }
+    product.quantity -= 1;
+    saveProducts(products);
+    purchaseMessage.textContent = `Compra realizada com sucesso! Você adquiriu 1 ${productName}.`;
+    purchaseMessage.style.display = 'block';
+    renderMarketplace();
+  }
+
+  // Sell form submit handler - register or update product
+  sellForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = sellForm['prod-name'].value.trim();
+    const quantity = Number(sellForm['prod-quantity'].value);
+    const unit = sellForm['prod-unit'].value;
+    const price = Number(sellForm['prod-price'].value);
+
+    if(!name || quantity < 0.01 || !unit || price < 0.01){
+      alert('Preencha todos os campos corretamente.');
+      return;
+    }
+
+    // Handle photo as Base64 data URL
+    const file = prodPhotoInput.files[0];
+
+    function proceedWithProduct(photoDataUrl){
+      let products = loadProducts();
+      let existing = products.find(p => p.name.toLowerCase() === name.toLowerCase() && p.seller === currentUser.username);
+
+      if(existing){
+        existing.quantity += quantity;
+        existing.price = price;
+        existing.unit = unit;
+        if(photoDataUrl) existing.photo = photoDataUrl;
+      } else {
+        products.push({
+          name,
+          quantity,
+          unit,
+          price,
+          seller: currentUser.username,
+          photo: photoDataUrl || null
+        });
+      }
+      saveProducts(products);
+      sellForm.reset();
+      renderProductList();
+    }
+
+    if(file){
+      const reader = new FileReader();
+      reader.onload = function(event){
+        proceedWithProduct(event.target.result);
+      }
+      reader.readAsDataURL(file);
+    } else {
+      proceedWithProduct(null);
+    }
+  });
+
+  // Render all necessary views after login or tab change
+  function renderFormsAndLists(){
+    renderProductList();
+    renderMarketplace();
+  }
+
+  // Default initial tab on auth screen
+  switchAuthTab('login');
+
+</script>
+
+</div>
+</body>
+</html>
+
